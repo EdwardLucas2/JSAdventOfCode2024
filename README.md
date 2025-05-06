@@ -47,10 +47,10 @@ This algorithm runs in O(m) time for a single report of length m, and O(n * m) o
 A new constraint is introduced: the reactor has a "Problem Dampener" that can tolerate a single bad level. A report is considered safe if it becomes safe after removing any one of its levels.
 
 #### Solution:
-I'm not pround of this solution, but I wanted to complete this one quickly. I brute-forced it by first checking if the report is safe without a level removed. If not, I try by checking saftey after removing each level in-turn.
+I'm not pound of this solution, but I wanted to complete this one quickly. I brute-forced it by first checking if the report is safe without a level removed. If not, I try by checking saftey after removing each level in-turn.
 
 Best case complexity is O(n), but the worst and average case complexity is O(n^2), where the saftey check O(n) is run for each level in the list (n, or n/2 in the average case, levels to check saftey for). This assumes that the unnececary array copy I use runs in constant time, but in any case this could be trivially removed by keeping track of the last level removed and re-adding to an exisiting array instead of copying the entire array prior to level removal.
 
 My solution leads to lots of wasted work, it ran easily on my mac, but I would optimise it by
-a) removing unnececary array copying from brute-force solution
-b) calculating validity of adjacent pairs of levels in each direction, and pairs to the 'next next' level (assuming the next level is removed by the dampener). If all pairs are valid in one direction (or more), allowing for 1 dampened level pair. I may implement this proposal later.
+  a) removing unnececary array copying from brute-force solution
+  b) calculating validity of adjacent pairs of levels in each direction, and pairs to the 'next next' level (assuming the next level is removed by the dampener). If all pairs are valid in one direction (or more), allowing for 1 dampened level pair. I may implement this proposal later.
