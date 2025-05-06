@@ -12,12 +12,12 @@ I read the file input into two ArrayLists in memory from disk using a Scanner cl
 First I sorted each list from smallest to largest O(n*log(n)) time complexity (where n is the combined length of the two lists). I assume that both lists are the same length.
 I then iterate over each pair of numbers, calculating their difference and summing it to a running total - O(n) complexity.
 
-The 'best-case' solution to this problem is O(n). My solution is O(n) + O(n*logn) = O(n*logn).
+The 'best-case' solution to this problem is O(n). My solution is O(n) + O(n* logn) = O(n* logn).
 I expect my solution isn't optimal, and the sorting of each list is unnececary, but I'm running this on an M2-Mac, so speed isn't a big concern.
 ### Part 2
 #### Problem:
 Given the same two lists, calculate instead their 'similarity' score. This is calculated by summing the multiple of the number of times each number in the left list occurs in the right list.
-Ie: left list: 1,2,3, right list: 1,1,2 Similarity = (1*2)+(2*1)+(3*0) = 4
+Ie: left list: 1,2,3, right list: 1,1,2 Similarity = (1 * 2)+(2 * 1)+(3 * 0) = 4
 #### Solution:
 I read the lists from disk in the same way as in part 1, I then sort both lists.
 
