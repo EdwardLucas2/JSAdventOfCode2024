@@ -54,3 +54,36 @@ Best case complexity is O(n), but the worst and average case complexity is O(n^2
 My solution leads to lots of wasted work, it ran easily on my mac, but I would optimise it by
   - removing unnececary array copying from brute-force solution
   - Calculating the validity of adjacent pairs of levels in each direction, and pairs to the 'next next' level (assuming the next level is removed by the dampener). If all pairs are valid in one direction (or more), allowing for 1 dampened level pair. I may implement this proposal later.
+
+## Problem 3 - Mull It Over
+### Part 1
+#### Problem
+We are given a string of 'corrupted memory' that contains the instruction 'mul(X,Y)'. We are tasked by finding the result of each valid 'mul' instruction is the memory, and summing all their results.
+#### Solution
+This one was very easy, I used a Regular Expression 'mul\([0-9]{1,3},[0-9]{1,3}\)' to find all the valid instructions, and another simple function to take the string of a valid instruction and return the result.
+### Part 2
+#### Problem
+This is where it got a bit trickier, two new instructions 'do()' and 'don't()'. Instructions where either 'valid' or 'invalid', depending on if the most recent, previous, instruction is a 'do()' or 'don't()'.
+We must calculate the sum of only the 'valid' mul instruction's results
+#### Solution
+I used a regex to get the indexes (in the corrupted memory string) of all the do and don't instructions. I stored the indexes of the do and don't instructions in two separate, sorted, lists.
+I iterate through both lists using two pointers (one for each list) from smallest index to largest. E.g. for do list: {1,2,3,5}, don't list: {4,6} the index visit order would be {1,2,3,4,5,6}
+As we iterate through the lists we keep track of what the last instruction is, and when the end of a 'valid' section is reached, I send the 'valid' substring to be processed.
+
+# Problem 4 - Ceres Search
+### Part 1
+#### Problem
+We are given a grid of letters, and need to find the number of occurrences of 'XMAS'. XMAS can be written top-down, left-right, right-left, diagonally, etc. It is essentially a wordsearch.
+#### Solution
+I read the input into a 2d character array, then iterate over all the rows and columns in the array. If the character is an 'X', I check each possible direction that an XMAS could occur. Ie: each of the three characters to the right, below, to the left, and diagonally, of the X, seeing if they are {M, A, S}.
+I count up the number of valid occurrences, and add it to the running total. This runs is O(n) time, where n is the number of characters in the input string. This is because I compare each character in the grid with an 'X', and checking for 'XMAS' at each X is a constant time operation.
+### Part 2
+#### Problem
+Instead of searching for 'XMAS' in the word search we need to search for:\
+M.S\
+.A.\
+M.S\
+(Or other orientations, sorry for the poor formatting)
+#### Solution
+I use a very similar technique to Part 1, I iterate over each character in the grid, excluding the edges, and compare it with 'A', I then check each character to the top-left, top-right, bottom-left, and bottom-right, to see if there is a valid X'd MAS.
+It's a little messy with some nested if statements, but it runs in linear (O(N)) time as well.
