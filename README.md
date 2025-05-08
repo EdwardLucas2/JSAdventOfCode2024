@@ -70,7 +70,7 @@ I used a regex to get the indexes (in the corrupted memory string) of all the do
 I iterate through both lists using two pointers (one for each list) from smallest index to largest. E.g. for do list: {1,2,3,5}, don't list: {4,6} the index visit order would be {1,2,3,4,5,6}
 As we iterate through the lists we keep track of what the last instruction is, and when the end of a 'valid' section is reached, I send the 'valid' substring to be processed.
 
-# Problem 4 - Ceres Search
+## Problem 4 - Ceres Search
 ### Part 1
 #### Problem
 We are given a grid of letters, and need to find the number of occurrences of 'XMAS'. XMAS can be written top-down, left-right, right-left, diagonally, etc. It is essentially a wordsearch.
@@ -87,3 +87,61 @@ M.S\
 #### Solution
 I use a very similar technique to Part 1, I iterate over each character in the grid, excluding the edges, and compare it with 'A', I then check each character to the top-left, top-right, bottom-left, and bottom-right, to see if there is a valid X'd MAS.
 It's a little messy with some nested if statements, but it runs in linear (O(N)) time as well.
+
+## Problem 5 - Print Queue
+### Part 1
+#### Problem
+We are given a list of 'updates', each update is a list of pages, identified by page number, to print in order.
+We are also given a list of rules governing the ordering of valid page printing, in this format 'X|Y', where page X must be printed before page Y.
+Given this list of updates, determine which ones are 'valid' i.e. obey all the ordering rules, then calculate the sum middle page number of the valid updates (all the updates have an odd length, so this is trivial)
+#### Solution
+I used a Scanner and a Regex to parse the file into memory. I stored updates as a list of ArrayList<Integer>, and the rules as a Hashmap<Integer, Hashset<Integer>> (Map< Page to be printed before, Set < Pages to be printed after >>).
+
+How to determine if an update is valid:
+Initialise a set<int>: Pages already printed, add the first element in the update to it
+Iterate through pages in the update (skipping the 0th index, it doesn't need to be checked as it's before every page), for each page, get the rule for this page, i.e. the get set of pages that this page must be printed before. If this set overlaps (shares an element) with the previously printed page set, this update is invalid.
+If we reach the end of the update without discovering a fault, the update is valid. Getting the middle number is trivial: (middle index = size - 1/2)
+
+This runs in time complexity: O(n*r), where n is the number of pages in the update, and r is the average number of rule pages in the update. I think this is the best case time complexity.
+
+Foreach update I determine if it's valid, if so, sum it's middle value to a running total.
+Overall time complexity: $$O(n * r * u), r=mean pages/rule in update, u=numupdates, n=meanpagesperupdate$$
+### Part 2
+#### Problem
+In this part we need to re-order the invalid updates to a valid order, then sum the middle numbers of all the re-ordered updates.
+#### Solution
+I first attempted a method that iterated through the list as in part 1, keeping track of previously printed pages and their indexes, and upon finding an invalid rule, moving the offending page(s) to the position(s) directly after the current page (that has a rule invalidated), then restarting iteration from the beginning.
+It was a pain to debug, as it involved modifying the same list I was iterating through, and wasn't efficient, the average time complexity for re-ordering a single update would be O(n * r * i), where n is the number of pages in the update, r is the mean number of rules, and i is the number of broken rules in the list. The worst-case time complexity would be much worse as a page moved to fix one rule could violate another.
+
+In my second attempt I approached it 'rules first', instead of 'page first'. I initialised an empty list to store the ordered update. I then iterated through the pages in the update, then for each page I got its rules and iterated through each page in my re-ordered update list, check if the re-ordered page is contained in the current page's rules. If it was I inserted it just before, otherwise at the end of the list.
+This allowed me to build a valid list, rather than trying to re-order elements in an invalid one.
+
+Time Complexity: O(n^2), where n is the number of pages in the update. I think this is the best-case time complexity, (I only have medium confidence in this), as each page needs to be compared with the rules of every other page. Unless calculating the join of two sets can be done in constant time, I think this is as good as it gets.
+
+## Problem 6
+### Part 1
+#### Problem
+We are given a 2d map that represents an area a 'guard' patrols. The map is represented as a 2d matrix, each cell (element in the matrix) either is an obstacle, or is clear. The guard patrols the map deterministically:
+The guard moves forward if the cell in front of them is clear (they can face, left, right, up, or down, *not diagonally*), if it's not clear (the cell in front of the guard is an obstacle), they turn 90 degrees right, ie, up, to left, to down, then forwards a space (if it's also not clear, they will keep rotating).
+We are given a map showing the location of obstacles, clear floor, and the guards starting position and direction. We need to determine how many different cells the guard will visit i.e. until the guard loops, or moves off the map
+#### Solution
+I chose the most straight-forward way to solve this: simulation.
+I stored the games state using a class (my first use of object-oriented programming in this challenge) with a 2d int array for the map, which stores the tiles (un)visited and obstacles. It stores the guards position and orientation using three ints, and a step counter. I wrote some helper functions to read in a game state from the file, and run an iteration, then ran many iterations until I reached max_steps, a property I defined to avoid having to implement loop detection, or the guard moved off the map.
+One neat thing about this implementation was the use of an 2d int array to store visited and unvisited state, 1 represented an unvisited floor cell, 2 a visited one, and 3 an obstacle. This precluded me from needing a separate 'visisted' array, saving space. I didn't implement loop detection as I only needed to simulate one 'map' which didn't have the guard move in a loop, meaning that loop detection wasn't needed at this stage to save unnecessary looping iterations.
+### Part 2
+#### Problem
+This is where the problem became more interesting, and I was glad I stored state in using an object, rather than simply using inline variables in a function.
+I needed to determine in how many different locations a new (single) obstacle could be added, where the guard would move in a loop.
+#### Solution
+While I could try to design a smart strategy to detect loops in a map, maybe by looking at pairs of objects in adjacent columns or rows, I decided I'd rather make my computer sweat a bit, and stick with my previous simulation strategy.
+##### Loop detection
+I implemented loop detection by storing every previous guard position and location, then doing a look-up at each step to determine if the simulation had looped. Since the 'lookup check' would be done at every iteration it was important that it was quick.
+I stored previous positions using a HashMap < Integer, HashMap < Integer, HashSet < Integer >>>, where you would check if a state had been repeated using Map < Guard X Position, Map < Guard Y Position, Set < Orientation >>>. (You would run a 'contains' on the set fetched from the maps).
+This would check for a loop in constant time, which I was very happy with (adding a position is also constant (amortised) complexity)
+##### Obstacle Placement Calculation
+Since only one obstacle can be placed, and the guard in the input map doesn't loop *as is*, we can narrow down the number of possible obstacle placements to those visited by the guard in the initial, unmodified, map. If an obstacle was placed elsewhere the guards path would be unchanged, making a loop impossible.
+
+I iterate over each 'visited' cell, add an obstacle, and run the simulation until either a loop is found, or the simulation ends (guard leaves the map).\
+*N.B. the max step counter is no longer necessary due to loop detection - the simulation cannot go on indefinitely anymore, I, however, retained it to make debugging easier*
+
+I then sum the number of simulations where a loop was formed, and return that value. The time complexity is O(n * s), where n is the number of visited nodes in the given map, and s is the mean number of steps in each underlying simulation (with an added obstacle), i.e. how many simulations steps until either a loop is found, or the guard leaves the map
