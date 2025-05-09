@@ -145,3 +145,47 @@ I iterate over each 'visited' cell, add an obstacle, and run the simulation unti
 *N.B. the max step counter is no longer necessary due to loop detection - the simulation cannot go on indefinitely anymore, I, however, retained it to make debugging easier*
 
 I then sum the number of simulations where a loop was formed, and return that value. The time complexity is O(n * s), where n is the number of visited nodes in the given map, and s is the mean number of steps in each underlying simulation (with an added obstacle), i.e. how many simulations steps until either a loop is found, or the guard leaves the map
+
+## Problem 7 - Bridge Repair
+### Part 1
+#### Problem
+We are given a list of 'equations', which comprise of a list of elements, and a target value. We need to find the operators that go in-between the elements that make the result equal the target value. Operators ignore precedence rules (BIDMAS), and are evaluated left-to-right.
+For example, for an input equation with target value 16, and operators {1,3,4}, the correct two operators would be {+, *} ((1+3)*4=16).\
+*N.B. only the operators {+, \*} can be used, and all elements are positive (>0)*
+
+We are given a list of equations, we need to find which ones are 'valid' - where there exists a set of operators where the sum of the equation is equal to it's target value - and sum their target values.
+#### Solution
+I solved this using a recursive algorithm that brute-forced every possible combination of operators. I created a class that represented an equation using a final integer array for the elements (since they could never change), and an array list of characters to store the operators.
+I also stored the current value of the equation (only using the elements there were operators for) as this saved re-computing the entire value each time an operator was added, I could instead work off the existing value. Finally I stored the target value, this wasn't entirely necessary, but it made things easier.
+
+*N.B. I also decided to use an OO approach to maintain flexibility and maximise possible code-reuse in Part 2 - i thought an equation class with appropriate helper functions could definitely be useful*
+
+My recursive algorithm would check for base-cases (all operators already added, current value equal to, or exceeding, target value), and return the equation if valid, or null if invalid. If a base-case wasn't reached, I would try adding a '+' operator and recurse, if this failed to result in a valid result I would try adding a '*' operator and recurse.
+
+Bug-fixing was a real pain on this one - I had some integer overflows, and resorted to using long's and the Math library to prevent and detect overflows. Finally, I had a really irritating bug in my base-case detection logic that took me ages to figure out: if an equation's current value matched the target value it would return the equation (signalling validity) **without checking if all the operators were added** therefore, an incomplete equation could be marked valid
+
+This solution worked, but it was pretty ugly. It had three main flaws:
+- It was recursive, Java doesn't support tail call recursion, so a long solution with lots of backtracking could result in a stack overflow. In addition, returning the result takes forever as it needs to work it's way up the call stack. An iterative approach would be faster and more resilient
+- Unnecessary object copying - at each recursive call I copy the Equation object. This is space inefficient, creates lots of work for the garbage collector, and copying the object is fairly compute intensive (especially the operator array copy)
+- Most importantly, **evaluating from left to right is a terrible approach**, it results in loads of unnecessary branches!
+
+If I evaluate from right to left (starting with the target value, and dividing by, or taking the difference of, the next element) I can detect invalid branches earlier when dividing by an element. If a division results in a decimal, that branch is invalid. When multiplying the result is always an integer, making this impossible to detect when evaluation from left to right.
+
+##### Example of left to right evaluation. Equation: target value 16, elements {1,3,4}.
+Step 1:\
+Equation: 1 + 3 _ 4. Current value: 1 + 3 = 4, target: 16\
+Step 2:\
+Equation: 1 + 3 + 4. Current value: 1 + 3 + 4 = 8, target: 16\
+Step 3 (backtrack):\
+Equation: 1 + 3 * 4. Current value: 1 + 3 * 4 = 16, target: 16. IS VALID!
+
+##### Example of right to left evaluation. Equation: target value 16, elements {1,3,4}.
+Step 1:\
+Equation: 1 _ 3 * 4. Current value (target is 1 - the value of the first element): 16 / 4 = 4\
+Step 2:\
+Equation: 1 * 3 * 4. Current value is 16 / 4 / 3 = 1.3 -> (while this also doesn't equal the first element, the division is invalid as it results in a remainder)\
+Step 3: (backtrack)\
+Equation: 1 + 3 * 4. Current value is 16 / 4 - 3 = 1. IS VALID!
+
+While the example isn't perfect, if it was an element longer it would perfectly illustrate my point (but it would make the examples longer), any division resulting in a remainder can identify an invalid multiplication instantly, pruning invalid branches.
+
