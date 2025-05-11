@@ -199,4 +199,13 @@ The average execution time for LTR evaluation was: 36.74ms and the RTL evaluatio
 #### Problem
 Another operator is introduced, the '||'. This operator concatenates the digits of the elements either side of it. For example: 100||23 = 10023. As in Part 1, calculate the sum of all possibly valid equations, but this time using the new concatenation operator in addition to sum and product.
 #### Solution
+When trying to add this extra operator my messy code I wrote to solve part 1 collapsed under the weight of my ineptitude. I decided to write a new, much shorter, cleaner solution to Part 1 (only supporting RTL evaluation). 
+Instead of trying to preserve the original problem, and the operations I had done so far (with the element list and operation array), I only kept track of unprocessed element in a stack (I only ever care about the next element), and a simple current value integer (with a target of 0). This removed the need for my unnecessary Equation class that had grown into a monster.
+Starting from scratch made my code way shorter and more readable, going from over 300 lines to 91, it was definitely a good idea.
+
+I first tried to add the concatenation operator without really considering it's intricacies. I (incorrectly) implemented it by popping the next two elements from the stack, concatenating them, and pushing it back onto the stack, then recursing. This worked for simple equations, like 198: 1, 98, but said the equation 7290: 6 8 6 15 (6 * 8 || 6 * 15), where the left element is changed before it's concatenated (when going from right to left).
+I initially thought that I may have to go back to left to right evaluation, as I couldn't see a way to evaluate the possible values of the left element prior to concatenation. However, after a bit of head scratching, and solving an equation or two by hand, I realised that I could remove the last digits from the current value when doing a concatenation, as I always new what the last digits of the result would be.
+
+For example: Target value: 566, elements: 7, 8, 6. Let's say the algorithm wants to try adding a concat operation (between the 8 and the 6 - we are going from right to left), I can verify it could possibly be a valid operation by comparing the current element, 6, with the last digit(s) of the current value. Since they match I can recurse and call with target value: 56, and elements 78.
+While this seems obvious in retrospect, I was really happy I made RTL evaluation work with this new operator, and with how clean my final solution is.
 
