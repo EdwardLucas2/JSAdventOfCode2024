@@ -189,3 +189,14 @@ Equation: 1 + 3 * 4. Current value is 16 / 4 - 3 = 1. IS VALID!
 
 While the example isn't perfect, if it was an element longer it would perfectly illustrate my point (but it would make the examples longer), any division resulting in a remainder can identify an invalid multiplication instantly, pruning invalid branches.
 
+I implemented right to left evaluation (with the inefficient, copy heavy recursive function used in my previous, LTR implementation) and measured the average time it took to validate all the equations (and sum their totals).
+I tried to re-use as much code as possible, and had a mix of flags and specific functions to differentiate between LTR and RTL modes, which wasn't beautiful, but it shows the difference between the different implementations well.
+
+The average execution time for LTR evaluation was: 36.74ms and the RTL evaluation was: 2.66ms, using RTL was a ~13X speedup\
+*N.B. I took the mean time of 50 runs to calculate these results - there was a good bit of noise even using the means, (I used System.currentTimeMillis to measure the time before and after each run)*
+
+### Part 2
+#### Problem
+Another operator is introduced, the '||'. This operator concatenates the digits of the elements either side of it. For example: 100||23 = 10023. As in Part 1, calculate the sum of all possibly valid equations, but this time using the new concatenation operator in addition to sum and product.
+#### Solution
+

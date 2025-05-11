@@ -5,11 +5,23 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        ArrayList<Equation> equations = ParseFile("test.txt", false);
 
-        for (Equation equation : equations) {
-            System.out.println(equation.ToString());
+        boolean LTR = true;
+
+        ArrayList<Equation> equations = ParseFile("input.txt", LTR);
+
+        //Get average current time in milliseconds
+        long totalTime = 0;
+        for(int run = 0; run < 100; run++) {
+            long timeBef = System.currentTimeMillis();
+            long sum = GetSumOfValidEquations(equations, LTR);
+            long timeAfter = System.currentTimeMillis();
+            totalTime += (timeAfter - timeBef);
         }
+
+        double avTime = totalTime / 50.0;
+
+        System.out.println("Time taken: " + avTime + "ms");
     }
 
     //Given a file name, reads the file, and assumes each line is an equation, and tries to parse it
@@ -63,6 +75,8 @@ public class Main {
 
     //This completes an equation recursively, but using right to left evaluation
     public static Equation CompleteEquationRTL(Equation eq) {
+        //System.out.println("Complete Eq RTL called. " + eq.ToStringRTL());
+
         //Base case check
         if(eq.curVal == eq.targetVal && eq.getOperators().size() == eq.elements.length - 1) {
             return eq; //Matches, and all operators added
@@ -71,6 +85,8 @@ public class Main {
         } else if(eq.getOperators().size() >= eq.elements.length - 1) {
             return null; //Operators are already filled out
         }
+
+        //System.out.println("Complete equation RTL called, no base case has been found, trying to add '*' operator'");
 
         //Try adding a '*' operator, first check for remainder
         if(eq.curVal % eq.elements[eq.elements.length - eq.getOperators().size() - 1] == 0) {
@@ -83,28 +99,37 @@ public class Main {
                 return timesEq; // Found solution
         }
 
+        //System.out.println("adding * operator hasn't worked, trying to add '+' operator");
+
         //Add a '+' operator
         Equation addEq = new Equation(eq);
         addEq.AddRTLOperator('+');
         return CompleteEquationRTL(addEq);
     }
 
-    public static long GetSumOfValidEquations(ArrayList<Equation> equations) {
+    public static long GetSumOfValidEquations(ArrayList<Equation> equations, boolean LTR) {
         //An equation is valid if it can possibly be true, calculate the sum of valid equations
 
         //Iterate over equations, summing valid ones
         long sum = 0;
         int count = 0;
         for(Equation equation : equations) {
-            Equation compEq = CompleteEquation(equation);
+            Equation compEq;
+            if(LTR) {
+                compEq = CompleteEquation(equation);
+            }
+            else {
+                compEq = CompleteEquationRTL(equation);
+            }
+
             if(compEq != null) {
-                sum = Math.addExact(sum, compEq.targetVal);
+                sum = Math.addExact(sum, compEq.total);
                 count++;
-                System.out.println(compEq.ToString());
+                //System.out.println(compEq.ToString());
             }
         }
 
-        System.out.println("Sum of valid equations: " + sum + ", valid equations: " + count + "/" + equations.size());
+        //System.out.println("Sum of valid equations: " + sum + ", valid equations: " + count + "/" + equations.size());
 
         return sum;
     }

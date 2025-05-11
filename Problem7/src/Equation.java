@@ -11,6 +11,7 @@ public class Equation {
 
     public long curVal;
     public long targetVal;
+    public long total;
 
     public Equation(String s, boolean LTR) {
         //Parse a string into an equation object, first check if the string is valid
@@ -32,10 +33,11 @@ public class Equation {
             if(LTR) {
                 //If LTR, target is first num in string
                 this.targetVal = Long.parseLong(numMatch.group());
+                this.total = Long.parseLong(numMatch.group());
             } else {
-                //RTL, target is 0, current val is first num
-                this.targetVal = 0;
+                //RTL, current val is target num
                 this.curVal = Long.parseLong(numMatch.group());
+                this.total = Long.parseLong(numMatch.group());
             }
         } else {
             System.err.println("Error parsing equation string: " + s);
@@ -55,16 +57,21 @@ public class Equation {
             elementsArray[i] = elements.get(i);
         }
         this.elements = elementsArray;
-        if(LTR)
+        if(LTR) {
             this.curVal = this.elements[0];
+        } else {
+            //With RTR, we need to make sure the first element is counted, set the target to the first value
+            this.targetVal = this.elements[0];
+        }
         this.operators = new ArrayList<>();
     }
 
-    public Equation(int[] elements, ArrayList<Character> operators, int targetVal) {
+    public Equation(int[] elements, ArrayList<Character> operators, int targetVal, int total) {
         this.elements = elements;
         this.operators = operators;
         this.targetVal = targetVal;
         this.curVal = elements[0];
+        this.total = total;
     }
 
     public Equation(Equation equation) {
@@ -73,6 +80,7 @@ public class Equation {
         this.operators.addAll(equation.operators);
         this.targetVal = equation.targetVal;
         this.curVal = equation.curVal;
+        this.total = equation.total;
     }
 
     public ArrayList<Character> getOperators() {
@@ -100,7 +108,27 @@ public class Equation {
 
     //Used for RTL evaluation, where the current value decreases
     public void AddRTLOperator(char operator) {
+        //Check for length
+        if(operators.size() >= elements.length - 1) {
+            System.err.println("Operator overflow, trying to add too many operators");
+            return;
+        }
 
+        //Add op to list
+        operators.add(operator);
+
+        //Get element index that this operator applies to
+        int elIndex = elements.length - operators.size();
+
+        //Compute new cur val
+        if(operator == '+') {
+            curVal = Math.addExact(curVal, -elements[elIndex]);
+        } else if(operator == '*') {
+            curVal = Math.floorDiv(curVal, elements[elIndex]);
+        } else {
+            System.err.println("Trying to add invalid operator: " + operator);
+            return;
+        }
     }
 
     public String ToString() {
