@@ -5,10 +5,30 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        long sum = GetResultPart2("input.txt");
+        System.out.println("Sum: " + sum);
+    }
 
-        boolean LTR = true;
+    public static long GetResultPart2(String fn) {
+        try {
+            Scanner sc = new Scanner(new File(fn));
 
-        ArrayList<Equation> equations = ParseFile("input.txt", LTR);
+            long sum = 0;
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                long val = Part2Solver.Solve(line, true);
+                sum+=val;
+                //System.out.println(line + ". Val: " + val);
+            }
+            return sum;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public static double GetAverageComputeTime(String fn, boolean LTR) {
+        ArrayList<Equation> equations = ParseFile(fn, LTR);
 
         //Get average current time in milliseconds
         long totalTime = 0;
@@ -19,9 +39,7 @@ public class Main {
             totalTime += (timeAfter - timeBef);
         }
 
-        double avTime = totalTime / 50.0;
-
-        System.out.println("Time taken: " + avTime + "ms");
+        return totalTime / 50.0;
     }
 
     //Given a file name, reads the file, and assumes each line is an equation, and tries to parse it

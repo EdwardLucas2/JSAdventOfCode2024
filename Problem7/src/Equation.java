@@ -60,7 +60,7 @@ public class Equation {
         if(LTR) {
             this.curVal = this.elements[0];
         } else {
-            //With RTR, we need to make sure the first element is counted, set the target to the first value
+            //With RTL, we need to make sure the first element is counted, set the target to the first value
             this.targetVal = this.elements[0];
         }
         this.operators = new ArrayList<>();
@@ -100,7 +100,8 @@ public class Equation {
             curVal = Math.addExact(curVal, elements[operators.size()]);
         } else if(operator == '*') {
             curVal = Math.multiplyExact(curVal, elements[operators.size()]);
-        } else {
+        }
+        else {
             System.err.println("Trying to add invalid operator: " + operator);
             return;
         }
