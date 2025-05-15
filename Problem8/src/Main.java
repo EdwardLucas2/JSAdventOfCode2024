@@ -8,7 +8,11 @@ public class Main {
         MapData map = ParseMapFile("input.txt");
         PrintMap(map);
 
-        HashSet<Coordinate> antinodes = FindAntinodes(map);
+        HashSet<Coordinate> antinodes = FindAntinodesResonantHarmonics(map);
+
+        System.out.print(map.toString(antinodes));
+
+        PrintAntiNodes(antinodes);
 
         System.out.println("Num unique antinodes: " + antinodes.size());
     }
@@ -48,6 +52,63 @@ public class Main {
                         // Anti 2 is within bounds
                         System.out.println("Antinode (" + anti2.data[0] + ", " + anti2.data[1] + ") in bounds");
                         antinodes.add(anti2);
+                    }
+                }
+            }
+        }
+
+
+
+        return antinodes;
+    }
+
+    public static HashSet<Coordinate> FindAntinodesResonantHarmonics(MapData map) {
+        //Init co-ord array for found anti-nodes
+        HashSet<Coordinate> antinodes = new HashSet<>();
+
+        for(char ant: map.AntennaLocations.keySet()) {
+            //Iterate over every unique pair of antennas
+            for(int i = 0; i < map.AntennaLocations.get(ant).size()-1; i++) {
+                for(int j = i+1; j < map.AntennaLocations.get(ant).size(); j++) {
+                    //Calculate the position difference between them
+                    int[] antI = map.AntennaLocations.get(ant).get(i);
+                    int[] antJ = map.AntennaLocations.get(ant).get(j);
+
+                    //System.out.println("Finding anti nodes for antenna at (" + antI[0] + ", " + antI[1] + ") and at (" + antJ[0] + ", " + antJ[1] + ")");
+
+                    //Calculate the difference between them, multiplied by 1.5
+                    float[] dif = new float[]{(antI[0] - antJ[0]), (antI[1] - antJ[1])};
+
+                    //Find the average position between the two nodes
+                    float[] center = new float[]{(antI[0] + antJ[0])/2f, (antI[1] + antJ[1])/2f};
+
+                    //Find all points on the line going one way
+                    int step = 0; //Start at 0 here to ensure antinodes at tower positions are calculated
+                    while(true) {
+                        Coordinate coord = new Coordinate(new int[]{Math.round(center[0] + dif[0]*step + dif[0]/2f), Math.round(center[1] + dif[1]*step + dif[1]/2f)});
+                        // Is this within map bounds
+                        if (coord.data[0] >= 0 && coord.data[1] >= 0 && coord.data[0] < map.width && coord.data[1] < map.height) {
+                            // Within bounds
+                            antinodes.add(coord);
+                            step++;
+                        } else {
+                            //Out-of bounds
+                            break;
+                        }
+                    }
+                    //Let's try the other way
+                    step = -1;
+                    while(true) {
+                        Coordinate coord = new Coordinate(new int[]{Math.round(center[0] + dif[0]*step + dif[0]/2f), Math.round(center[1] + dif[1]*step + dif[1]/2f)});
+                        // Is this within map bounds
+                        if (coord.data[0] >= 0 && coord.data[1] >= 0 && coord.data[0] < map.width && coord.data[1] < map.height) {
+                            // Within bounds
+                            antinodes.add(coord);
+                            step--;
+                        } else {
+                            //Out-of bounds
+                            break;
+                        }
                     }
                 }
             }
@@ -112,6 +173,25 @@ public class Main {
             this.AntennaLocations = AntennaLocations;
             this.width = width;
             this.height = height;
+        }
+
+        //Given a list of characters
+        public String toString(HashSet<Coordinate> coords) {
+            StringBuilder sb = new StringBuilder();
+
+            for(int row = 0; row < height; row++) {
+                for(int col = 0; col < width; col++) {
+                    Coordinate c = new Coordinate(new int[]{row, col});
+                    if(coords.contains(c)) {
+                        sb.append("#");
+                    } else {
+                        sb.append(".");
+                    }
+                }
+                sb.append("\n");
+            }
+
+            return sb.toString();
         }
     }
 

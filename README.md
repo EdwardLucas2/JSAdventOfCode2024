@@ -209,3 +209,22 @@ I initially thought that I may have to go back to left to right evaluation, as I
 For example: Target value: 566, elements: 7, 8, 6. Let's say the algorithm wants to try adding a concat operation (between the 8 and the 6 - we are going from right to left), I can verify it could possibly be a valid operation by comparing the current element, 6, with the last digit(s) of the current value. Since they match I can recurse and call with target value: 56, and elements 78.
 While this seems obvious in retrospect, I was really happy I made RTL evaluation work with this new operator, and with how clean my final solution is.
 
+## Problem 8 - Resonant Collinearity
+### Part 1
+#### Problem
+We are given a 2d map, again as a grid of characters. On the gird there are a number of transmission antennas on different frequencies. The frequency of an antenna is denoted by it's character.
+An anti-node is formed where a point is in-line with two antennas of the same frequency, and n distance from one of the antennas, and 2n distance from the other. We need to find the number of unique locations where there are anti-node's.
+
+#### Solution
+I store the map with 3 variables: width (int), height (int), and antenna locations. I store antenna locations with a HashMap<Frequency, ArrayList<Coordinates (int[])>.
+
+My algorithm iterates over every unique pair of antennas of the same frequency, finds their 'centre point' (by taking the mean of the two points x and y coordinates), and add and minus their difference * 1.5. If the co-ordinate is withing the map's bounds I add it to the output set.
+To make adding to the set run in constant time I stored the output in a HashSet. However, hashsets of objects, like int[], calculate equality using a hash of the object reference, not it's contents. Therefore, two different int arrays, both with the same co-ordinates, could co-exist in the same set. To solve this I wrote a wrapper class for int[] that overwrote the HashCode and equality functions, that used the value of the elements in the array, not it's reference.
+
+The number of unique locations with anti-nodes is taken by calculating the size of the resulting hashset. This runs in O(n^2*f) time, where n is the average number of antennas of the same frequency, and f is the number of different frequencies.
+I'm not sure how I would reduce the time complexity of my solution, I can't think of a way to get around a calculation for every unique pair of antennas of the same frequency.
+### Part 2
+#### Problem
+Instead of anti-nodes occurring at just two locations for each pair of antennas, and the distance n and  n*2 from each antenna respectively, they occur at every point in-line with two antennas of the same frequency.
+My solution wasn't very fast, it calculate the mid-point and the step size (horizontal and vertical movement) for each pair of antennas, then iterated in each direction adding anti-nodes until the edge of the map was reached.
+
