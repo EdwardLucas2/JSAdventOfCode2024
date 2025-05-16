@@ -1,11 +1,10 @@
 import java.util.HashSet;
 
 public class Set {
-    public int numHeads, numEnds;
+    public int numEnds;
     public HashSet<Node> members;
 
-    public Set(int numHeads, int numEnds) {
-        this.numHeads = numHeads;
+    public Set(int numEnds) {
         this.numEnds = numEnds;
         members = new HashSet<>();
     }
@@ -15,11 +14,10 @@ public class Set {
         Node start = new Node(x, y, map[y][x]);
         visited.add(start);
         if(members.add(start)) {
-            //Adding new node to set, is it a head or an end
-            if(map[y][x] == 0) {
-                numHeads++;
-            } else if(map[y][x] == 9) {
+            //Adding new node to set, is it an end
+            if(map[y][x] == 9) {
                 numEnds++;
+                return; //Can't go any higher we're done
             }
 
             //We haven't already visited this node
@@ -60,7 +58,7 @@ public class Set {
     }
 
     public int NumRoutes() {
-        return numEnds * numHeads;
+        return numEnds;
     }
 
     //This is the worst function i have ever written - extremely slow

@@ -13,7 +13,7 @@ public class Main {
 
         //System.out.println(MapArrayToString(map));
 
-        ArrayList<Set> sets = ParseMap(map);
+        ArrayList<Set> sets = ParseMap(map, false);
 
         //System.out.println(sets.get(0).toString(map));
 
@@ -76,7 +76,7 @@ public class Main {
         return routes;
     }
 
-    public static ArrayList<Set> ParseMap(int[][] nodes) {
+    public static ArrayList<Set> ParseMap(int[][] nodes, boolean rating) {
         ArrayList<Set> sets = new ArrayList<>();
         HashSet<Node> visited = new HashSet<>();
 
@@ -85,16 +85,16 @@ public class Main {
             for(int x = 0; x < nodes[y].length; x++) {
                 //Have we already visited this node
                 Node node = new Node(x, y, nodes[y][x]);
-                if(!visited.contains(node)) {
-                    //We haven't, instantiate a new set
-                    Set newSet = InstantiateSet(x, y, nodes, visited);
-                    sets.add(newSet);
+                if(!visited.contains(node) && node.height == 0) {
+                    if(rating) {
+
+                    } else {
+                        //We haven't, instantiate a new set
+                        Set newSet = InstantiateSet(x, y, nodes, visited);
+                        sets.add(newSet);
+                    }
                 }
             }
-        }
-
-        for(Node n : visited) {
-            //System.out.println(n.toString());
         }
 
         return sets;
@@ -102,8 +102,13 @@ public class Main {
 
     public static Set InstantiateSet(int x, int y, int[][] map, HashSet<Node> visited) {
         //Instantiate the set
-        Set set = new Set(0, 0);
+        Set set = new Set(0);
         set.FillSet(x, y, map, visited);
+        return set;
+    }
+
+    public static Set InstantiateSetRating(int x, int y, int[][] map) {
+        Set set = new Set(0);
         return set;
     }
 }
