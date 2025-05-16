@@ -1,6 +1,7 @@
 # Jane Street Advent Of Code 2024 Solutions
 When applying for a job at Jane Street I came across this challenge when researching the position, I thought they might be fun alternative to the LeetCode grind.
 I started this in May 2025, long after the challenge was over, but I didn't look at any other peoples solutions beforehand. Enjoy!
+*Check out the challenge site here: https://adventofcode.com/*
 
 ## Problem 1
 ### Part 1
