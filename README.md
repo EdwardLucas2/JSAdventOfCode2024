@@ -270,3 +270,6 @@ This solution is really slow, each file block needs to be compared with every em
 If I were to do this again I would investigate building a new diskmap from scratch, rather than expensively modifying one 'as you go'. I would also investigate some sort of space 'caching', which stores the indexes of spaces larger that a certain size in a lookup table that can be accessed in constant time.
 A Hashmap<Size, PriorityQueue< Block Index >> might be suitable.
 
+## Problem 10 - Hoof It
+### Part 1
+#### Problem
