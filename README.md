@@ -268,5 +268,5 @@ The solution to part 2 was much easier to implement, as I didn't need to deal wi
 This solution is really slow, each file block needs to be compared with every empty block to the left of it, which is O(n^2) comparisons. In addition, when a block is moved, a new block often needs to be added to the middle of the list (it stores the remaining empty space in the left block), which runs in linear time as well. I think the complexity of this, in the worst case where every file block is moved to a space bigger than it, is O(n^3).
 
 If I were to do this again I would investigate building a new diskmap from scratch, rather than expensively modifying one 'as you go'. I would also investigate some sort of space 'caching', which stores the indexes of spaces larger that a certain size in a lookup table that can be accessed in constant time.
-A Hashmap<Size, PriorityQueue<Indexes>> might be suitable.
+A Hashmap<Size, PriorityQueue< Block Index >> might be suitable.
 
