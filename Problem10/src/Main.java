@@ -13,7 +13,7 @@ public class Main {
 
         //System.out.println(MapArrayToString(map));
 
-        ArrayList<Set> sets = ParseMap(map, false);
+        ArrayList<Set> sets = ParseMap(map, true);
 
         //System.out.println(sets.get(0).toString(map));
 
@@ -87,7 +87,8 @@ public class Main {
                 Node node = new Node(x, y, nodes[y][x]);
                 if(!visited.contains(node) && node.height == 0) {
                     if(rating) {
-
+                        Set newSet = InstantiateSetRating(x, y, nodes);
+                        sets.add(newSet);
                     } else {
                         //We haven't, instantiate a new set
                         Set newSet = InstantiateSet(x, y, nodes, visited);
@@ -103,12 +104,13 @@ public class Main {
     public static Set InstantiateSet(int x, int y, int[][] map, HashSet<Node> visited) {
         //Instantiate the set
         Set set = new Set(0);
-        set.FillSet(x, y, map, visited);
+        set.FillSet(x, y, map, visited, false);
         return set;
     }
 
     public static Set InstantiateSetRating(int x, int y, int[][] map) {
         Set set = new Set(0);
+        set.FillSet(x, y, map, new HashSet<>(), true);
         return set;
     }
 }

@@ -9,11 +9,11 @@ public class Set {
         members = new HashSet<>();
     }
 
-    public void FillSet(int x, int y, int[][] map, HashSet<Node> visited) {
+    public void FillSet(int x, int y, int[][] map, HashSet<Node> visited, boolean rating) {
         //Have we already visited this node
         Node start = new Node(x, y, map[y][x]);
         visited.add(start);
-        if(members.add(start)) {
+        if(members.add(start) || rating) {
             //Adding new node to set, is it an end
             if(map[y][x] == 9) {
                 numEnds++;
@@ -26,7 +26,7 @@ public class Set {
                 //We can, is the node above reachable
                 if (map[y + 1][x] - map[y][x] == 1) {
                     //It is, recurse
-                    FillSet(x, y + 1, map, visited);
+                    FillSet(x, y + 1, map, visited, rating);
                 }
             }
 
@@ -35,7 +35,7 @@ public class Set {
                 //We can, is down node reachable
                 if (map[y - 1][x] - map[y][x] == 1) {
                     //It is, recurse
-                    FillSet(x, y - 1, map, visited);
+                    FillSet(x, y - 1, map, visited, rating);
                 }
             }
 
@@ -44,14 +44,14 @@ public class Set {
                 //We can, check if right node is reachable
                 if(map[y][x+1] - map[y][x] == 1) {
                     //It is, recurse
-                    FillSet(x+1, y, map, visited);
+                    FillSet(x+1, y, map, visited, rating);
                 }
             }
 
             //Check if we can go left
             if(x > 0) {
                 if(map[y][x-1] - map[y][x] == 1) {
-                    FillSet(x - 1, y, map, visited);
+                    FillSet(x - 1, y, map, visited, rating);
                 }
             }
         }
