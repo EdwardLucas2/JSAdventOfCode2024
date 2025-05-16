@@ -7,22 +7,39 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        SolvePart1V1("input.txt");
-        SolvePart1V2("input.txt");
-        SolvePart2("input.txt");
+        SolvePart1V1("input.txt", true);
+        SolvePart1V2("input.txt", true);
+        //SolvePart2("input.txt");
     }
 
-    public static void SolvePart1V1(String filename) {
-        int[] diskMap = SimpleDiskMapFileParser(filename);
+    public static void SolvePart1V1(String filename, boolean measureTime) {
+        if(!measureTime) {
+            int[] diskMap = SimpleDiskMapFileParser(filename);
+            SimpleCompressDiskMap(diskMap);
+            long checksum = SimpleCalcChecksum(diskMap);
+            System.out.println("Simple checksum: " + checksum);
+        } else {
+            double totalTime = 0;
+            int[] diskMap = SimpleDiskMapFileParser(filename);
 
-        SimpleCompressDiskMap(diskMap);
+            for(int i = 0; i < 100; i++) {
+                diskMap = SimpleDiskMapFileParser(filename);
+                assert diskMap != null;
 
-        long checksum = SimpleCalcChecksum(diskMap);
+                long startTime = System.currentTimeMillis();
+                SimpleCompressDiskMap(diskMap);
+                SimpleCalcChecksum(diskMap);
+                long endTime = System.currentTimeMillis();
+                totalTime += (endTime - startTime);
+            }
 
-        System.out.println("Simple checksum: " + checksum);
+            double avgTime = totalTime / 100.0;
+
+            System.out.println("Avg V1 time: " + avgTime);
+        }
     }
 
-    public static void SolvePart1V2(String fn) {
+    public static void SolvePart1V2(String fn, boolean measureTime) {
         DiskMap diskMap = ParseFileToMap(fn);
 
         if (diskMap == null) {
@@ -30,14 +47,28 @@ public class Main {
             return;
         }
 
-        //System.out.println(diskMap.toString());
+        if(!measureTime) {
+            diskMap.CompressWithFrag();
+            System.out.println("Checksum: " + diskMap.Checksum());
+        } else {
+            double totalTime = 0;
+            for(int i = 0; i < 100; i++) {
+                diskMap = ParseFileToMap(fn);
+                assert diskMap != null;
 
-        diskMap.CompressWithFrag();
+                long startTime = System.currentTimeMillis();
+                diskMap.CompressWithFrag();
+                diskMap.Checksum();
+                long endTime = System.currentTimeMillis();
+                totalTime += (endTime - startTime);
+            }
 
-        //System.out.println(diskMap.toString());
-
-        System.out.println("Checksum: " + diskMap.Checksum());
+            double avgTime = totalTime / 100.0;
+            System.out.println("Avg V2 time: " + avgTime);
+        }
     }
+
+
     public static void SolvePart2(String fn) {
         DiskMap diskMap = ParseFileToMap(fn);
 
@@ -188,7 +219,7 @@ public class Main {
         public String toString() {
             StringBuilder sb = new StringBuilder();
 
-            for (Main.Block b : blocks) {
+            for (Block b : blocks) {
                 //Is this block a file
                 if (b.index >= 0) {
                     //It is
@@ -212,23 +243,26 @@ public class Main {
                 //System.out.println("lPtr: " + lPtr + ", left block index: " + blocks.get(lPtr).index + ", size: " + blocks.get(lPtr).size + "\nrPtr: " + rPtr + ", right block index: " + blocks.get(rPtr).index + ", size: " + blocks.get(rPtr).size);
                 //System.out.println(this.toString());
 
-                if(blocks().get(rPtr).index < 0) {
+                Block lb = blocks().get(lPtr);
+                Block rb = blocks().get(rPtr);
+
+                if(rb.index < 0) {
                     rPtr--;
-                } else if(blocks().get(lPtr).index >= 0) {
+                } else if(lb.index >= 0) {
                     lPtr++;
                 } else {
                     //Left pointer is a space, and right pointer is a block, move as many elements in right block to left
                     //Is the right block larger or equal to left block (will left block be removed)
-                    if(blocks.get(rPtr).size >= blocks.get(lPtr).size) {
+                    if(rb.size >= lb.size) {
                         //Right block is bigger than, or equal to, left
                         //Instantiate a new block to replace the left block, it should be full of files from the right block
-                        int index = blocks.get(rPtr).index;
-                        int size = blocks.get(lPtr).size;
-                        Main.Block newFilledLeftBlock = new Main.Block(index, size);
+                        int index = rb.index;
+                        int size = lb.size;
+                        Block newFilledLeftBlock = new Block(index, size);
 
                         //Now replace the right block with two blocks: one empty, one full of the remaining elements that couldn't be moved
-                        Main.Block newEmptyRightBlock = new Main.Block(-1, size);
-                        Main.Block remainingRightBlock = new Main.Block(index, blocks.get(rPtr).size - size);
+                        Block newEmptyRightBlock = new Block(-1, size);
+                        Block remainingRightBlock = new Block(index, rb.size - size);
 
                         //Place the remaining elements where the old right block is
                         blocks.set(rPtr, remainingRightBlock);
@@ -240,9 +274,9 @@ public class Main {
                         lPtr++;
                     } else {
                         //Left is bigger than right, we need to insert a new block to the left of left pointer with the moved blocks, and modify the existing block
-                        Main.Block newFilledLeftBlock = new Main.Block(blocks.get(rPtr).index, blocks.get(rPtr).size);
-                        Main.Block newEmptyLeftBlock = new Main.Block(-1, blocks.get(lPtr).size - blocks.get(rPtr).size);
-                        Main.Block newEmptyRightBlock = new Main.Block(-1, blocks.get(rPtr).size);
+                        Block newFilledLeftBlock = new Block(rb.index, rb.size);
+                        Block newEmptyLeftBlock = new Block(-1, lb.size - rb.size);
+                        Block newEmptyRightBlock = new Block(-1, rb.size);
 
                         //Change the current left block to the filled block (shorter than the original)
                         blocks.set(lPtr, newFilledLeftBlock);
@@ -292,7 +326,7 @@ public class Main {
                             //Set the right block
                             blocks.set(rPtr, rightEmpty);
 
-                            //If there are remaing spaces, add the new empty block
+                            //If there are remaining spaces, add the new empty block
                             if(remainingSpaceLeft.size > 0)
                                 blocks.add(l+1, remainingSpaceLeft);
                             break;

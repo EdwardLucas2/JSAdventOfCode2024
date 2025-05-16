@@ -228,3 +228,45 @@ I'm not sure how I would reduce the time complexity of my solution, I can't thin
 Instead of anti-nodes occurring at just two locations for each pair of antennas, and the distance n and  n*2 from each antenna respectively, they occur at every point in-line with two antennas of the same frequency.
 My solution wasn't very fast, it calculate the mid-point and the step size (horizontal and vertical movement) for each pair of antennas, then iterated in each direction adding anti-nodes until the edge of the map was reached.
 
+## Problem 9 - Disk Defragmenter
+### Part 1
+#### Problem
+We are given a 'disk map', represented by a list of numbers. Each number represents the size of either a file block or empty space on the disk. File and space blocks alternate. E.g. the disk map '1,2,3' = '0..111'. The id, or index, of a file block is based on the order in which it appears, from 0 up.
+We are given the task of saving disk space by moving file blocks one at a time, from right to the left most empty space on disk. The disk map: '1,2,3,2,1': '0..111..2' would be compressed to '02111....'. We then need to output the 'checksum' of the compressed file. The checksum is calculated by multiplying the id of each file block by it's index, and summing the result of every block.
+#### Solution
+I solved this naively at first, I parsed the file into an int array, with one element for each file block. I then used a left and a right pointer to move the rightmost file block element to the leftmost free space.
+
+**Example for the diskmap 1,2,2**
+1) 0..111, lft ptr: 0, rgt ptr: 5, left is not an empty element, increment left
+2) 0..111, lft ptr: 1, rgt ptr: 5, left is empty, right is file, swap elements, increment left, decrement right
+3) 01.11., lft prt: 2, rgt ptr: 4, left is empty, right is file, swap elements, increment left, decrement right
+4) 0111.., lft ptr: 3, rgt ptr: 3, lft not smaller than rgt, we are done, return!
+
+This runs in O(n) time, where n is the number of elements. *N.B. bugfixing the checksum calculation was a little irritating, I got caught out by integer overflows, and used a long to store the checksums*
+### Part 2
+#### Problem
+This is where it got tricky, we can now only move entire file blocks when de-fragmenting, so file blocks can't be split up. Blocks can only be attempted to be moved once, from right to left.
+
+#### Solution - Part 1 Re-implementation
+I used this opportunity to also improve my solution to Part 1 , as I thought that it's time complexity could be improved, not running in linear time based on the number of elements, but on the number of blocks.
+I created a record class to store the block id (-1 for empty blocks) and their size, and a diskmap class that stored a list of blocks that represented an entire disk. along with compression and checksum functions.
+
+The logic for re-implementing Part 1 was ugly, storing each contiguous blocks as a single object isn't great when you need to split up blocks all the time.
+I.e when the left space block is smaller than the right file block, you need to split up the right block.
+
+E.g. for the disk map '123', you start with step 0: '0|..|111' (a pipe symbol seperates each block) then when the disk is de-fragmented the resulting disk is: '0|11|1|...'.
+The right block needs to be split up into two, one block stores the remaining elements in the right block, and the second block stores the empty spaces left behind by the moved file elements.
+
+However, all the block splitting should run in constant time, so while the logic is more complex, I thought it should have a lower time complexity than my original solution to part 1.
+However, when I ran a test, my V2 solution was far slower, the V1 solution to Part 1 ran is 0.5ms, while my V2 solution ran in ~18ms (when taking the mean of 100 runs). I discovered my mistake in the logic, I frequently have to add anew block to the middle of the block list, this doesn't run in constant time as I had previously assumed, it runs in O(n) time, where n is the number of elements to the right of the element being added, this makes the complexity of my V2 solution quadratic, rather than linear.
+
+Instead of using an array list to store the blocks, I could have used a doubly-linked list. This would make element removal and addition to the middle of the list run in constant time.
+
+#### Solution - Part 2
+The solution to part 2 was much easier to implement, as I didn't need to deal with nearly as much block splitting, however, it wasn't very fast. I iterate over each file block from right to left. I check if the file has previously been checked using a hashset of checked file's ids, if not, I terate from left to right, looking for the first empty block big enough to the left of the file. If one is found, I move the file there.
+
+This solution is really slow, each file block needs to be compared with every empty block to the left of it, which is O(n^2) comparisons. In addition, when a block is moved, a new block often needs to be added to the middle of the list (it stores the remaining empty space in the left block), which runs in linear time as well. I think the complexity of this, in the worst case where every file block is moved to a space bigger than it, is O(n^3).
+
+If I were to do this again I would investigate building a new diskmap from scratch, rather than expensively modifying one 'as you go'. I would also investigate some sort of space 'caching', which stores the indexes of spaces larger that a certain size in a lookup table that can be accessed in constant time.
+A Hashmap<Size, PriorityQueue<Indexes>> might be suitable.
+
