@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Stone {
     public long value;
     public Stone next;
