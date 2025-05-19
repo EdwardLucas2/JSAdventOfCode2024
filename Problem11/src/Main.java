@@ -4,11 +4,27 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Stone start = ParseFile("test.txt");
+        Stone start = ParseFile("input.txt");
 
         StringBuilder sb = new StringBuilder();
         start.toString(sb);
         System.out.println(sb.toString());
+
+        int numBlinks = 75;
+
+        for(int i = 0; i < numBlinks; i++) {
+            System.out.println("Step: " + i);
+            Blink(start);
+        }
+
+        //Count number of stones
+        int count = 0;
+        Stone cur = start;
+        while(cur != null) {
+            count++;
+            cur = cur.next;
+        }
+        System.out.println("Count: " + count);
     }
 
     public static Stone ParseFile(String fileName) {
@@ -33,5 +49,25 @@ public class Main {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static void Blink(Stone start) {
+        Stone cur = start;
+
+        while(cur != null) {
+            boolean skipNext = cur.ProcessBlink();
+
+            if(skipNext) {
+                cur = cur.next.next;
+            } else {
+                cur = cur.next;
+            }
+        }
+    }
+
+    public static String StonesToString(Stone start) {
+        StringBuilder sb = new StringBuilder();
+        start.toString(sb);
+        return sb.toString();
     }
 }
