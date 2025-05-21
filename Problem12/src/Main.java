@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        char[][] map = ParseFile("test5.txt");
+        char[][] map = ParseFile("input.txt");
         boolean discount = true;
 
         System.out.println("Input Map:\n" + MapToString(map));
@@ -290,10 +290,10 @@ public class Main {
         boolean bottomRight = matches(x + 1, y - 1, map, ch);
 
         // Count outward corners
-        if (!top && !right && !topRight) count++; // Top-right corner
-        if (!bottom && !right && !bottomRight) count++; // Bottom-right corner
-        if (!top && !left && !topLeft) count++; // Top-left corner
-        if (!bottom && !left && !bottomLeft) count++; // Bottom-left corner
+        if (!top && !right) count++; // Top-right corner
+        if (!bottom && !right) count++; // Bottom-right corner
+        if (!top && !left) count++; // Top-left corner
+        if (!bottom && !left) count++; // Bottom-left corner
 
         // Count inward corners
         if (top && left && !topLeft) count++; // Inward top-left corner
