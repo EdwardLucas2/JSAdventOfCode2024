@@ -274,3 +274,6 @@ A Hashmap<Size, PriorityQueue< Block Index >> might be suitable.
 ## Problem 10 - Hoof It
 ### Part 1
 #### Problem
+We are given a 2d topographic map (i.e. a map composed of the height of the land at each position). Each height is an int between 0 and 9. A hiking trail is a route on the map (that cannot go diagonally) that goes from a spot at height 0, a trail head, to a spot at height 9, a trail end. Additionally, the height change between two adjacent spots on the route must always increase by 1.
+A trail head (a spot with position 0) is given a score, which is the number of trail-ends (spots with height 9) accessible via a hiking trail from that head. We must calculate the total score of all the trail heads in a given map.
+#### Solution
