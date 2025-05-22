@@ -277,3 +277,70 @@ A Hashmap<Size, PriorityQueue< Block Index >> might be suitable.
 We are given a 2d topographic map (i.e. a map composed of the height of the land at each position). Each height is an int between 0 and 9. A hiking trail is a route on the map (that cannot go diagonally) that goes from a spot at height 0, a trail head, to a spot at height 9, a trail end. Additionally, the height change between two adjacent spots on the route must always increase by 1.
 A trail head (a spot with position 0) is given a score, which is the number of trail-ends (spots with height 9) accessible via a hiking trail from that head. We must calculate the total score of all the trail heads in a given map.
 #### Solution
+I first parse the map file into a 2d int array. I then iterate through every spot in the map, looking for an unvisited trail head. When one is reached I then instantiate a Set object. I then add every node accessible from that trail head to a HashSet in the Set object, keeping track of the number of trail ends there are. I then add the set to a list, and all the visited nodes to a 'visited' hashset.
+
+Once all the nodes have been visited I iterate over every set and sum their scores (number of trail ends available), which is the final result.
+
+My solution was a little over-built, I didn't need a Node object for each spot, however, I wanted to make my solution to part 1 as suitable for part 2 as possible.
+My solution runs in linear time (where n is the number of nodes), which I think is the best conceivable runtime.
+### Part 2
+#### Problem
+Instead of calculating the the score of every trail and calculating the total score (number of trail ends accessible from each trail head), we need to sum their ratings. A rating of a route is the number of distinct routes from one trail head to one trail end.
+#### Solution
+My solution was extremely simple, I stopped using the 'visited' hash set when recursing along a path. This allowed the same trail end to be reached multiple times via different routes, neatly calculating the number of distinct routes by default. Of course this would lead to loops if the path could go down or flat, but since it's mandatory to go up each step, this eliminates loops by default.
+
+## Problem 11 - Plutonian Pebbles
+### Part 1
+#### Problem
+We are given a list of 'stones'. Each stone has a number, every time we 'blink' the stones change according to a set of rules:
+- If the number is 0, it becomes 1
+- If the stone has an even number of digits, it is split into two. Ie: stone(8000) -> stone(80), stone(0) (leading 0s are removedd)
+- If no other rules apply, the value is multiplied by 2024
+
+Given a starting state, we must calculate the number of stones after a set number (25) of blinks.
+#### Solution
+I decided to store the stones as a singly linked list to make stone addition to the middle of the list easy. The problem emphasized the importance of ordering, so I didn't use an array list, as adding an element to the middle of an array list runs in O(n) time. Using a singly linked list also removes the, albeit amortized, worst case cost of array list addition complexity of O(n) (when the entire array needs to be copied into a new, larger array).
+
+I created a stone class that stores its current value and the next stone in the list. It also includes some helper functions. Implementing the blink function was trivial, I used floor(log base 10(value) + 1) to calculate the number of digits. I calculated the left half of a number by dividing the value by 10^(numDigits/2).
+
+For each step I iterated over each stone in the list and called it's blink function, and at the end I calculated the length of the singly linked list.
+### Part 2
+#### Problem
+We now asked to calculate the number of stones after 75 blinks, instead of 25.
+#### Solution
+Initially I simply re-tried my solution to part 1, but after a few blinks the number of stones increased and so did the time to process each blink until it ground to a (near) halt.
+The ordering of each stone doesn't matter (a stone isn't affected by its neighbours, and we aren't asked to calculate the final order of the stones) all that matters is the number of stones after a set number of blinks.
+This means there is a lot of repeated work during a simulation when a stone with a value that has already been simulated previously is generated again later on during the simulation.
+
+I eliminate this duplicated work using a cache, and trade increased space complexity for a lower time complexity. I use a HashMap of HashMaps to allow constant time lookup for a given stones starting value, and the number of resulting stones after n steps.
+To maximise the use of the cache I run the simulate each stone for the entire period in-turn, rather than doing 1 blink at a time for all stones. I.e. I simulate all 75 steps for stone 0, then all steps for stone 1, etc.
+
+Before simulating a step I calculate the number of steps left that I need to simulate, and see if the value is in the cache. I.e. has a stone with initial value 1 been simulated for 10 steps. If it has I can fetch the number of 'child stones' in constant time from the cache, otherwise I manually simulate the step.
+This dramatically sped up my solution, my code went from not completing a run of 75 steps in 10 minutes to completing them in less than a second.
+A further cache optimisation could have been implemented that allowed for partial caches. I.e. if a stone of a value had been simulated for fewer than X steps, it could provide the values of the stones of X-n steps instead.
+
+## Problem 12 - Garden Groups
+### Part 1
+#### Problem
+We are given the map of a garden. A garden is a 2d array of plots, each of which contains a different plant type (represented by a different character). We need to fence in each different contiguous area of uniform plant types and calculate the total fencing cost. The cost of fencing in one region is given by multiplying the regions area by it's perimeter.
+#### Solution
+**Overview:** Iterate over every unvisited plot of land. For each unvisited plot, visit evey other plant in it's 'region' (connected to original plot via plants of the same type) recursively, keeping track of the total perimeter and area. Once all the regions are found, calculate and sum the cost of all the regions and return.
+
+I have a 'Region' record which stores a total area and perimeter value. I initialise a 2d boolean 'visited' array. I then iterate over each plot in the garden and check if it's been visited. If a plot hasn't been visited calculate its perimeter by counting the number of surrounding plots that are of a different type (or out of bounds of the map). Then for each surrounding, unvisited plot of the same plant type recurse, and add the results to the total area and perimeter.
+Return a new region object with the cumulative total perimeter and area of all the plots.
+
+Once all plots have been visited iterate over each region object and sum their costs. I was very happy with my solution, it runs in linear time, which I think is the best conceivable runtime (there is a maximum cap of n regions to iterate over when summing the total cost, where n is the number of plots).
+
+### Part 2
+#### Problem
+There is now a cost discount available, the cost of a region's fencing is now the area * the number of edges. I.e. two fences in a straight line only cost 1.
+#### Solution
+This took me a few attempts. I wanted to solve part 2 in linear time, which I thought was definitely possible using a similar approach to part 1.
+I first tried only counting the perimeter of 'corner plots', i.e. plots that weren't inline with other plots (had plots to the left and right/above below them). And while this worked in some cases, it failed in edge cases.
+
+My breakthrough was 'corner counting'. For each plot I would see if how many corners the plot had.
+
+There are two kinds of corner: the convex and the concave. The convex corner is like the bottom left of an L. A plot has a convex corner in it's bottom left if the plot below and to the left of it have different plants and/or are out of bounds.
+A concave corner is like the one the inside of an L. A plot has a concave corner in it's top-right position if the plot above and to the right has the same plant type, and the plot to it's top-right (diagonally) is of a different plant type.
+
+For each plot count the number of corners it has (each plot has 0-4 corners), and calculate the cost by multiplying corner count by area. (Same recursive region calculation as in part 1). Also runs in linear time as corner counting runs in constant time.

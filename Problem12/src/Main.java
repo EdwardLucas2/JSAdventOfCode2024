@@ -67,8 +67,7 @@ public class Main {
     }
 
     public static ArrayList<Region> FindRegions(char[][] map, boolean discount) {
-        //Init adjacency arrays and visited array
-        int[][] adjacencyArray = new int[map.length][map[0].length];
+        //Init visited array
         boolean[][] visited = new boolean[map.length][map[0].length];
         ArrayList<Region> regions = new ArrayList<>();
 
@@ -80,9 +79,9 @@ public class Main {
                     //Element not already visited, find this elements region
                     Region r;
                     if(discount) {
-                        r = ProcessRegion2(map, x, y, adjacencyArray, visited);
+                        r = ProcessRegion2(map, x, y, visited);
                     } else {
-                        r = ProcessRegion(map, x, y, adjacencyArray, visited);
+                        r = ProcessRegion(map, x, y, visited);
                     }
                     regions.add(r);
 
@@ -94,7 +93,7 @@ public class Main {
         return regions;
     }
 
-    public static Region ProcessRegion(char[][] map, int startX, int startY, int[][] adjacencyArray, boolean[][] visited) {
+    public static Region ProcessRegion(char[][] map, int startX, int startY, boolean[][] visited) {
         //Check that the start position hasn't been visited
         if(visited[startY][startX]) {
             System.err.println("Error calculating adjacency of position (" + startY + ", " + startX + "): Spot already visited");
@@ -117,7 +116,7 @@ public class Main {
             if (map[startY][startX - 1] == ch) {
                 //Same plant type, recurse if not visited
                 if(!visited[startY][startX - 1]) {
-                    Region r = ProcessRegion(map, startX - 1, startY, adjacencyArray, visited);
+                    Region r = ProcessRegion(map, startX - 1, startY, visited);
                     regionPerimeter += r.perimeter;
                     regionArea += r.area;
                 }
@@ -135,7 +134,7 @@ public class Main {
             if (map[startY][startX + 1] == ch) {
                 if(!visited[startY][startX + 1]) {
                     //Same plant type, recurse
-                    Region r = ProcessRegion(map, startX + 1, startY, adjacencyArray, visited);
+                    Region r = ProcessRegion(map, startX + 1, startY, visited);
                     regionPerimeter += r.perimeter;
                     regionArea += r.area;
                 }
@@ -153,7 +152,7 @@ public class Main {
             if (map[startY + 1][startX] == ch) {
                 //Same plant type, recurse
                 if (!visited[startY + 1][startX]) {
-                    Region r = ProcessRegion(map, startX, startY + 1, adjacencyArray, visited);
+                    Region r = ProcessRegion(map, startX, startY + 1, visited);
                     regionPerimeter += r.perimeter;
                     regionArea += r.area;
                 }
@@ -171,7 +170,7 @@ public class Main {
             if (map[startY - 1][startX] == ch) {
                 //Same plant type, recurse
                 if(!visited[startY - 1][startX]) {
-                    Region r = ProcessRegion(map, startX, startY - 1, adjacencyArray, visited);
+                    Region r = ProcessRegion(map, startX, startY - 1, visited);
                     regionPerimeter += r.perimeter;
                     regionArea += r.area;
                 }
@@ -184,13 +183,10 @@ public class Main {
             plotPerimeter++;
         }
 
-        //Set adjacency array value
-        adjacencyArray[startY][startX] = plotPerimeter;
-
         return new Region(regionArea, plotPerimeter + regionPerimeter);
     }
 
-    public static Region ProcessRegion2(char[][] map, int startX, int startY, int[][] cornerCountArray, boolean[][] visited) {
+    public static Region ProcessRegion2(char[][] map, int startX, int startY, boolean[][] visited) {
         //Check that the start position hasn't been visited
         if(visited[startY][startX]) {
             System.err.println("Error calculating adjacency of position (" + startY + ", " + startX + "): Spot already visited");
@@ -212,7 +208,7 @@ public class Main {
             if (map[startY][startX - 1] == ch) {
                 //Same plant type, recurse if not visited
                 if (!visited[startY][startX - 1]) {
-                    Region r = ProcessRegion2(map, startX - 1, startY, cornerCountArray, visited);
+                    Region r = ProcessRegion2(map, startX - 1, startY, visited);
                     regionCornerCount += r.perimeter;
                     regionArea += r.area;
                 }
@@ -224,7 +220,7 @@ public class Main {
             if (map[startY][startX + 1] == ch) {
                 if (!visited[startY][startX + 1]) {
                     //Same plant type, recurse
-                    Region r = ProcessRegion2(map, startX + 1, startY, cornerCountArray, visited);
+                    Region r = ProcessRegion2(map, startX + 1, startY, visited);
                     regionCornerCount += r.perimeter;
                     regionArea += r.area;
                 }
@@ -236,7 +232,7 @@ public class Main {
             if (map[startY + 1][startX] == ch) {
                 //Same plant type, recurse
                 if (!visited[startY + 1][startX]) {
-                    Region r = ProcessRegion2(map, startX, startY + 1, cornerCountArray, visited);
+                    Region r = ProcessRegion2(map, startX, startY + 1, visited);
                     regionCornerCount += r.perimeter;
                     regionArea += r.area;
                 }
@@ -248,15 +244,12 @@ public class Main {
             if (map[startY - 1][startX] == ch) {
                 //Same plant type, recurse
                 if (!visited[startY - 1][startX]) {
-                    Region r = ProcessRegion2(map, startX, startY - 1, cornerCountArray, visited);
+                    Region r = ProcessRegion2(map, startX, startY - 1, visited);
                     regionCornerCount += r.perimeter;
                     regionArea += r.area;
                 }
             }
         }
-
-        //Set adjacency array value
-        cornerCountArray[startY][startX] = cornerCount;
 
         return new Region(regionArea, cornerCount + regionCornerCount);
     }
