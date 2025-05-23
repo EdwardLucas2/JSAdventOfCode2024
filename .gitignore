@@ -5,3 +5,4 @@ test.csv
 .idea/
 .DS_Store
 out
+.venv/

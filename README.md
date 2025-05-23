@@ -344,3 +344,4 @@ There are two kinds of corner: the convex and the concave. The convex corner is 
 A concave corner is like the one the inside of an L. A plot has a concave corner in it's top-right position if the plot above and to the right has the same plant type, and the plot to it's top-right (diagonally) is of a different plant type.
 
 For each plot count the number of corners it has (each plot has 0-4 corners), and calculate the cost by multiplying corner count by area. (Same recursive region calculation as in part 1). Also runs in linear time as corner counting runs in constant time.
+
